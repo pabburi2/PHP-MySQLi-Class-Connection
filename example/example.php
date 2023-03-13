@@ -25,7 +25,11 @@ include('../src/pabburi_mysqli_config.php');
 include('../src/pabburi_mysqli_class.php');
 
 
+# 현재 PHP버전
+echo 'Current PHP version: ' . phpversion() . PHP_EOL;
+
 # 마스터 접속 테스트
+mysqli_report(MYSQLI_REPORT_OFF);
 $oMysqliM       = new pabburi_mysqli($aDbMaser);
 $oDbConInfo     = $oMysqliM->getConTime();
 echo date('Y-m-d H:i:s ') . '마스터 커넥션 소요시간: ' . $oDbConInfo->timeConAllResult . '초' . PHP_EOL;

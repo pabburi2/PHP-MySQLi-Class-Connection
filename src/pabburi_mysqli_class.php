@@ -16,25 +16,26 @@
  */
 class pabburi_mysqli extends mysqli
 {
-  private $_MASTER_MAX_IDX  = 200;    // 마스터, 슬레이브 서버의 기준
+  private $_MASTER_MAX_IDX    = 200;    // 마스터, 슬레이브 서버의 기준
 
-  private static $_connected = false; // 커넥션 성공 했나?
-  private $_dbSvrType        = '';    // _MASTER_MAX_IDX 으로 체크한 master, slave
-  public  $_dbSvrIdx         = 0;     // 환경설정의 서버 index
+  private static $_connected  = false; // 커넥션 성공 했나?
+  private $_dbSvrType         = '';    // _MASTER_MAX_IDX 으로 체크한 master, slave
+  public  $_dbSvrIdx          = 0;     // 환경설정의 서버 index
+  private $_isLog             = false;
 
   // 커넥션 타임
-  private $_timeConAllStart  = 0;     // 커넥선 시작시간
-  private $_timeConAllEnd    = 0;     // 커넥션 종료시간
-  private $_timeConAllResult = 0;     // 커넥션 총 소요시간 - failover 포함 전체
+  private $_timeConAllStart   = 0;     // 커넥선 시작시간
+  private $_timeConAllEnd     = 0;     // 커넥션 종료시간
+  private $_timeConAllResult  = 0;     // 커넥션 총 소요시간 - failover 포함 전체
 
-  private $_timeConStart     = 0;     // 커넥션 시작시간 - 최종 커녁션
-  private $_timeConEnd       = 0;     // 커넥션 종료시간 - 최종 커녁션
-  private $_timeConResult    = 0;     // 커넥션 총 소요시간 - 최종 커넥션
+  private $_timeConStart      = 0;     // 커넥션 시작시간 - 최종 커녁션
+  private $_timeConEnd        = 0;     // 커넥션 종료시간 - 최종 커녁션
+  private $_timeConResult     = 0;     // 커넥션 총 소요시간 - 최종 커넥션
 
   // 쿼리 타임
-  private $_timeQryStart     = 0;     // _query 메소드 시작시간
-  private $_timeQryEnd       = 0;     // _query 메소드 종료시간
-  private $_timeQryResult    = 0;     // _query 메소드 총 소요시간
+  private $_timeQryStart      = 0;     // _query 메소드 시작시간
+  private $_timeQryEnd        = 0;     // _query 메소드 종료시간
+  private $_timeQryResult     = 0;     // _query 메소드 총 소요시간
 
   /**
    * 디비 커넥션을 수행(failover 처리 진행)
@@ -66,21 +67,10 @@ class pabburi_mysqli extends mysqli
       $pass       = $oDbinfo->pass;
 
       # 공백으로 넣거나 생략이 가능한것들
-      if ( isset($oDbinfo->port) ) {
-        $port       = $oDbinfo->port;
-      }
-      if ( isset($oDbinfo->db) ) {
-        $db         = $oDbinfo->db;
-      }
-      if ( isset($oDbinfo->charset) ) {
-        $charset    = $oDbinfo->charset;
-      }
-      if ( isset($oDbinfo->log) ) {
-        $is_log     = $oDbinfo->log;
-      }
-      if ( !$port ) {
-        $port       = 3306;
-      }
+      $port       = ( isset($oDbinfo->port) ) ? $oDbinfo->port:3306;
+      $db         = ( isset($oDbinfo->db) ) ? $oDbinfo->db:'';
+      $charset    = ( isset($oDbinfo->charset) ) ? $oDbinfo->charset:'';
+      $is_log     = ( isset($oDbinfo->log) ) ? $oDbinfo->log:false;
 
       $this->setConTime('single', 'start');
       try {
@@ -100,6 +90,7 @@ class pabburi_mysqli extends mysqli
         }
         self::$_connected   = true;
         $this->_dbSvrIdx    = $dbSvrIdx;
+        $this->_isLog       = $is_log;
         $this->setConTime('all', 'end');
         return $this;
       }
